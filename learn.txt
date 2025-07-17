@@ -54,3 +54,24 @@ So the parent doesn’t return something new — it helps the child get set up.
 
      */
 }
+
+JSON AND BSON :
+{
+JSON IS AN OBJECT BUT IN STING FORM...
+ITS SEEMS LIKE AN OBJECT BUT ITS A TEXT...
+WE CAN CONVERT IT INTO AN OBJECT --> PARSE(JSON)
+WE CAN CONVERT AN OBJECT TO JSON --->.STRINGIFY()
+
+BSON ..IS JSON IN BINARY FROMAT FOR RFFICIENTLY STORING DATA ..
+AND FASTER READING DATA
+}
+ABOUT ARROW FUNC:
+{
+they donot have their own context i.e "this"
+}
+
+JWT:{
+its a bearer token.....
+jo bhi isko bearkrta hai ...usko data bhejdunga...
+
+}
