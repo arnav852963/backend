@@ -1,0 +1,56 @@
+SUPER KEY WORD:
+
+{
+
+    so jab super call hota hai....toh jo bhi propewrty parent intialise krta hai
+    vo child ke 'this' mei hoti hai ...aur parent ke this se koi relation nai....
+
+     code snippet example
+    /*
+    class A {
+  constructor() {
+    this.name = "Parent";
+    console.log("Inside A:", this);
+  }
+}
+
+class B extends A {
+  constructor() {
+    super(); // Ask parent to do their setup
+    this.name = "Child"; // Override or add more
+    console.log("Inside B:", this);
+  }
+}
+
+const obj = new B();
+
+     */
+    // here
+    /*
+    You say: new B()
+
+Inside B’s constructor, it calls super() → this means:
+👉 "Hey Parent (A), please run your constructor!"
+
+Parent class (A) runs. It sets this.name = "Parent"
+But wait — what is this here?
+👉 It's the child object being created (B), not some separate "A".
+
+Then control comes back to B, and it says
+this.name = "Child" — so it updates the same object.
+
+So, the final object is a B object that was initialized by A
+     */
+
+    // soo
+
+    /*
+    this in the child is its own object.
+
+But when super() is called, the parent works on the same object.
+
+So the parent doesn’t return something new — it helps the child get set up.
+
+
+     */
+}
