@@ -4,10 +4,30 @@ dotenv.config({
 })
 import mongo from "mongoose";
 import db from "./db/index.js";
+import {app} from "./app.js";
 
 
 
-db() // import db
+db()
+    .then(()=>{
+
+        //listen app
+        app.listen(process.env.PORT || 8000 , ()=>{
+            console.log(`runnnin at${process.env.PORT}`)
+
+        })
+        app.on("error" , (error) =>{
+            console.log( "errrrrrrrr........!-  " , error);
+            throw error
+        })
+
+
+    })
+    .catch((error)=>{
+        console.log(`err.......${error}`)
+    })
+
+
 
 
 
