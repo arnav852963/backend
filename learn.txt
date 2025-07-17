@@ -75,3 +75,8 @@ its a bearer token.....
 jo bhi isko bearkrta hai ...usko data bhejdunga...
 
 }
+
+middleware {
+JAANE SE PEHLE MUJSE MILTE JANA..
+ANNE SE PEHLE MUJE BATADENA
+}
