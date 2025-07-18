@@ -13,7 +13,7 @@ db()
 
         //listen app
         app.listen(process.env.PORT || 8000 , ()=>{
-            console.log(`runnnin at${process.env.PORT}`)
+            console.log(`runnnin at :${process.env.PORT}`)
 
         })
         app.on("error" , (error) =>{

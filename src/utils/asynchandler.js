@@ -13,6 +13,7 @@
 const asynchandler= (fun)=>async (req,res,next)=>{
     try {
         const response = await fun(req, res, next)
+        return response
         
     } catch (e) {
         res.status(e.code || 500).json({
@@ -22,3 +23,4 @@ const asynchandler= (fun)=>async (req,res,next)=>{
     }
     
 }
+export  {asynchandler}
