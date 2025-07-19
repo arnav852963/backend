@@ -10,4 +10,4 @@ const storage = multer.diskStorage({
     }
 }) // these all are parameters
 // cb is basically callback or returning values in simple terms...
-export const upload = multer({ storage: storage })
+export const upload_mul = multer({ storage: storage })

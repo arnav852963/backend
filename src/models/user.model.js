@@ -24,7 +24,7 @@ const userSchema = new Schema({
 
 
     },
-    fullname :{
+    fullName :{
         type: String,
         required: true,
         trim : true,
@@ -61,7 +61,7 @@ const userSchema = new Schema({
 } , {timestamps : true})
 userSchema.pre("save" , async function (next/*next flag ..pass to the next middleware*/) {
     if (!this.isModified("password")) return;
-    this.password = bcrypt.hash(this.password , 10);
+    this.password = await bcrypt.hash(this.password , 10);
     next();
     /*
     upto this...anytime we change data in any  user field...this middleware will run

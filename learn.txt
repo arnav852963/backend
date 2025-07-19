@@ -104,3 +104,9 @@ async handler doesn't run the parameter function...it return a function that can
 also the parameter function is not helping the async handler with any property..
 the asynchandler is just putting that function into try and catch..
 }
+
+.SOME() METHOD :
+{
+some runs on each array input and returns true or false
+with condition given
+}
