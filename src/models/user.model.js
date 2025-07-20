@@ -1,6 +1,12 @@
-import mongo ,{Schema} from "mongoose";
+/// <reference types="node" />
+
+import mongoose ,{Schema} from "mongoose";
 import jwt from "jsonwebtoken"
 import bcrypt from  "bcrypt"
+import dotenv from "dotenv"
+dotenv.config({
+    path: "./.env"
+})
 
 import * as string_decoder from "node:string_decoder";
 const userSchema = new Schema({
@@ -103,6 +109,7 @@ userSchema.methods.generateRefreshToken = function (){
              //name and key should be same for consistency
 
 
+
         },
         process.env.REFRESH_TOKEN_SECRET,{
             expiresIn: process.env.REFRESH_TOKEN_EXPIRY
@@ -110,4 +117,4 @@ userSchema.methods.generateRefreshToken = function (){
         }
     )
 }
-export const User = mongo.model("User" , userSchema)
+export const User = mongoose.model("User" , userSchema)

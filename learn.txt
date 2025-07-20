@@ -110,3 +110,17 @@ the asynchandler is just putting that function into try and catch..
 some runs on each array input and returns true or false
 with condition given
 }
+
+ACCESS AND REFRESH TOKEN:
+{
+->refresh token is not necesarry its a modern practise.
+->difference bw two is their expiry..
+->access are short-lived whereas refresh are long-lived
+->if i have access token ..so i can use that token to
+authorise anything.
+->lets say i expired the accesss tokenin like 15 min of the login
+session...then user have to login again..
+here comes the refresh token...
+user have to connect an endpoint...if the refresh token matches the one in the database..
+user will be provided with a new access token
+}

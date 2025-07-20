@@ -1,0 +1,2 @@
+1. "/" should not be at the end of mongodb uri db ke nam ko chod deta hai
+2.

@@ -1,4 +1,6 @@
 //fileserver pe aachuki hai ...ab muje usko cloudianry pe dalna hai bs
+/// <reference types="node" />
+
 import {v2 as cloudinary} from "cloudinary"
 import fs from "fs" // file handeling mainly file kapath chahiye
 import dotenv from "dotenv";
