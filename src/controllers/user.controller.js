@@ -3,6 +3,7 @@ import {APIERROR} from "../utils/APIERROR.js";
 import {User} from "../models/user.model.js";
 import {upload} from "../utils/cloudinary.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
+import {existed} from "../utils/user_exists.js";
 const  registerUser = asynchandler(async (req, res)=>{
     {
         /*
@@ -36,13 +37,25 @@ const  registerUser = asynchandler(async (req, res)=>{
 
 
     })) throw new APIERROR(400,"all fields are compulsory")
-    const existedUser =User.findOne({
+    const existedUser =await User.findOne({
         $or:[{username} , {email}]
+
+        // make sure to use await where needed
     })/*--this findone finds the first user schema which matches the {username} and {email}*/
+
     if (existedUser) throw new APIERROR(409,"user exists")
     /*multer req.files ka access deta hai*/const localpath_avatar =req.files?.avatar[0]?.path // multer jo banaya tha yaha utilize hoora
+
+    //console.log("file path-> ",req)
     // ..?.. does is that ki kya yeh field exist krti hai
-    const loacalpath_coverimage = req.files?.coverImage?.path
+    const loacalpath_coverimage = req.files?.coverImage[0]?.path
+    {
+        /*
+        req...multer
+        isme files mei jo avatar aur coverimage hai vo array mei store hai...
+        toh index dena zaruri hai...
+         */
+    }
 
     if (!localpath_avatar) throw new APIERROR(400,"avatar de bsdk")
     const avatar = await upload(localpath_avatar) // will return info about the url
@@ -53,10 +66,10 @@ const  registerUser = asynchandler(async (req, res)=>{
     const user =  await User.create({
         fullName,
         avatar: avatar.url,
-        coverImage: coverImage?.url || "",
+        coverImage: coverImage.url || "",
         email,
         password,
-        username:username.toLowerCase()
+        username
 
     })
 

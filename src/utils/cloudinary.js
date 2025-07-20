@@ -1,18 +1,27 @@
 //fileserver pe aachuki hai ...ab muje usko cloudianry pe dalna hai bs
 import {v2 as cloudinary} from "cloudinary"
 import fs from "fs" // file handeling mainly file kapath chahiye
-
+import dotenv from "dotenv";
+dotenv.config({
+    path:'./.env'
+})
+console.log( process.env.CLOUDINARY_API_KEY)
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
+    api_key: process.env["CLOUDINARY_API_KEY"],
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
+
 
 const upload = async (local_str)=>{
     try{
         if (!local_str/*i.e if its empty*/) return "empty str";
-        const res = await cloudinary.uploader.upload(local_str)
-        console.log("uploaded successfully" , res.url)
+        const res = await cloudinary.uploader.upload(local_str,{
+            resource_type:"auto"
+        })
+        //console.log("uploaded successfully" , res)
+
+
         return res;
 
     } catch (e) {

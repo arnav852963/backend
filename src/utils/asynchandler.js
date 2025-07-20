@@ -16,7 +16,11 @@ const asynchandler= (fun)=>async (req,res,next)=>{
         return response
         
     } catch (e) {
-        res.status(e.code || 500).json({
+        console.log("full error..." ,e)
+        let statusCode = 0
+        if (e.code>=100&& e.code<=1000) statusCode = e.code
+        else statusCode = 500
+        res.status(statusCode).json({
             success : false,
             message: e.message
         })

@@ -1,7 +1,7 @@
 import mongo ,{Schema} from "mongoose";
 import jwt from "jsonwebtoken"
 import bcrypt from  "bcrypt"
-import {static} from "express";
+
 import * as string_decoder from "node:string_decoder";
 const userSchema = new Schema({
     username :{
