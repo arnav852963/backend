@@ -5,20 +5,30 @@ import {upload} from "../utils/cloudinary.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import {existed} from "../utils/user_exists.js";
 
-// const generateAccessAndRefreshToken = async function (userid){
-//     try{
-//         const user =await User.findById(userid)
-//
-//         const accessToken =user.generateAccessToken()
-//         const refreshToken = user.generateRefreshToken()
-//
-//         user.RefreshToken = refreshToken
-//         await user.save()
-//     } catch (e) {
-//         throw new APIERROR(500 , "sorry")
-//
-//     }
-// }
+const generateAccessAndRefreshToken = async function (userid){
+    try{
+        /** @type {import("../models/user.model.js").User} */
+        const user =await User.findById(userid)
+
+        const accessToken =user.generateAccessToken()
+         const  refreshToken = user.generateRefreshToken()
+        user.refreshToken=refreshToken
+
+        await user.save({validateBeforeSave:false})
+        {
+            /*
+            so when u save user....it kicks the entire
+            moongose model...where u req password username etc..
+            but here we only wanna update the refreshtoken.
+            hence use {validateBeforeSave:false}
+             */
+        }
+        return {accessToken , refreshToken}
+    } catch (e) {
+        throw new APIERROR(500 , "sorry")
+
+    }
+}
 const  registerUser = asynchandler(async (req, res)=>{
     {
         /*
@@ -114,34 +124,93 @@ const  registerUser = asynchandler(async (req, res)=>{
 
 })
 
-// const loginUser = asynchandler(async (req,res) =>{
-//     /*
-//     TO DO'S:
-//     1.FETCH DATA FROM FRONTEND
-//     2.VALIDATE DATA..
-//     3.CHECK IF USER EXISTS OR NOT..
-//     4.IF EXISTS THEN MATCH INPUTS..
-//     5.PROVIDE ACCESS AND REFRESH TOKEN..
-//     6.SEND SECURE COOKIES...
-//     7.RESPONSE ....
-//
-//      */
-//     const {email , password} = req.body
-//     if (email.trim()==="" || password.trimEnd()==="") throw new APIERROR(400,"PASSWORD AND USERNAME IS REQUIRED")
-//     if (!email.trim().includes('@')) throw new APIERROR(100, "ENTER VALID EMAIL ADDRESS")
-//
-//     const user = await existed(email)
-//     if (!user) throw new APIERROR(404,"PLEASE REGISTER")
-//     // database se jab bhi baat krni hai ...await always
-//
-//     const isCorrect = await user.isPasswordCorrect(password)
-//
-//
-//
-//     if (!isCorrect) throw new APIERROR(401, "PASSWORD WRONG")
-//
-//
-//
-//
-// })
-export {registerUser}
+const loginUser = asynchandler(async (req,res) =>{
+    /*
+    TO DO'S:
+    1.FETCH DATA FROM FRONTEND
+    2.VALIDATE DATA..
+    3.CHECK IF USER EXISTS OR NOT..
+    4.IF EXISTS THEN MATCH INPUTS..
+    5.PROVIDE ACCESS AND REFRESH TOKEN..
+    6.SEND SECURE COOKIES...
+    7.RESPONSE ....
+
+     */
+    const {email , password} = req.body
+    if (email.trim()==="" || password.trimEnd()==="") throw new APIERROR(400,"PASSWORD AND USERNAME IS REQUIRED")
+    if (!email.trim().includes('@')) throw new APIERROR(100, "ENTER VALID EMAIL ADDRESS")
+
+    const user = await existed(email)//this instance of user doesnt contain reftoken
+    if (!user) throw new APIERROR(404,"PLEASE REGISTER")
+    // database se jab bhi baat krni hai ...await always
+
+
+    const isCorrect = await user.isPasswordCorrect(password)
+
+
+
+
+    if (!isCorrect) throw new APIERROR(401, "PASSWORD WRONG")
+    const access_refresh =await generateAccessAndRefreshToken(user._id)
+    const refreshToken = access_refresh.refreshToken
+    const accessToken = access_refresh.accessToken
+    user.refreshToken = ""
+    user.password = ""
+    const loggedIn = user /*yaha user.select wala err isiliye tha cause .select hamesha tabhi lagega jab query run horai hoo*/
+    const options = {
+        httpOnly:true,
+        secure:true
+    }
+    return res
+        .status(200)
+        .cookie("accessToken" , accessToken,options)// the string is the name of the cookie
+        .cookie("refreshToken",refreshToken,options)
+        .json(
+            new ApiResponse(200, {
+                user: loggedIn ,accessToken,refreshToken
+
+            },"user logged in successsfully")
+        )
+
+    {
+        /*
+        here i am returning cookie and accesstoken with the status
+         */
+    }
+
+
+
+
+
+
+
+
+
+})
+const logoutUser = asynchandler(async(req ,res) =>{
+// problem id we are not taking any input while loggin out ...so we cannot find the user and remove the info from database
+await User.findByIdAndUpdate(
+    req.user._id,
+    {
+        $set:{
+            refreshToken:undefined
+        }
+    },
+    {
+        new:true
+    }
+)
+
+    const options = {
+        httpOnly:true,
+        secure:true
+    }
+    return res
+        .status(200)
+        .clearCookie("accessToken")
+        .clearCookie("refreshToken")
+        .json(new ApiResponse(200 , {} ,"user logged out"))
+
+
+})
+export {registerUser,loginUser,logoutUser}

@@ -124,3 +124,27 @@ here comes the refresh token...
 user have to connect an endpoint...if the refresh token matches the one in the database..
 user will be provided with a new access token
 }
+
+app.use() and req parameter connection
+{
+The Connection Explained
+Think of an Express application as an assembly line.
+
+The Request (req): An incoming HTTP request is like a basic car chassis starting down the line.
+The req object contains all the initial parts and information about this specific request (like headers, URL, and query parameters).
+
+The Middleware Registration (app.use()): app.use(myMiddleware) is like adding a new workstation to the assembly line.
+You're telling Express, "For incoming requests, make them stop at this station."
+
+The Middleware Function: The middleware itself is the worker or robot at that station.
+Its job signature is always (req, res, next).
+ When the chassis (req) arrives at the station, the worker (middleware) can do one of three things:
+
+->Read the req object: Inspect the chassis for information.
+
+->Modify the req object: Add a new part to the chassis.
+
+->End the process: Send a response back (res.send()).
+
+->Pass it along: Call next() to send the chassis to the next station.
+}
