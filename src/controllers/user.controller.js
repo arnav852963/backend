@@ -4,6 +4,7 @@ import {User} from "../models/user.model.js";
 import {upload} from "../utils/cloudinary.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import {existed} from "../utils/user_exists.js";
+import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async function (userid){
     try{
@@ -213,4 +214,37 @@ await User.findByIdAndUpdate(
 
 
 })
-export {registerUser,loginUser,logoutUser}
+const generateRefreshAccessToken= asynchandler((req , res)=>{
+    /*
+    TO DO'S:
+    1.get refresh token from cookies
+    2.validate it.
+    3.decode the refreshToken.
+    4.get the user id and search the user in database.
+    5.match the refreshToken obtained and the one in the database
+    6.once validated , generate new access and refresh tokens and create their cookies.
+
+     */
+    const token = req.cookies?.refreshToken || req.body.refreshToken
+    if (!token) throw new APIERROR(401 , "unauthorised access")
+    const decoded_token = jwt.verify(token,process.env.REFRESH_TOKEN_SECRET)
+    if (!decoded_token)throw new APIERROR(401 , "something went wrong")
+    const user = await User.findById(decoded_token?._id).select("-password")
+    if (token!==user.refreshToken) throw new APIERROR(401,"unauthorised access")
+    const {new_accessToken , new_refreshToken} = generateAccessAndRefreshToken(decoded_token._id)
+    const options = {
+        httpOnly:true,
+        secure:true
+    }
+
+    res
+        .status(200)
+        .cookie("accessToken" ,options,new_accessToken )
+        .cookie("refreshToken", options,new_refreshToken)
+        .json(new ApiResponse(200, {new_refreshToken,new_accessToken},"generated successfully"))
+
+
+
+
+})
+export {registerUser,loginUser,logoutUser,generateRefreshAccessToken}
