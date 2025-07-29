@@ -5,6 +5,7 @@ import {upload} from "../utils/cloudinary.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import {existed} from "../utils/user_exists.js";
 import jwt from "jsonwebtoken";
+import {ConnectionStates} from "mongoose";
 
 const generateAccessAndRefreshToken = async function (userid){
     try{
@@ -214,7 +215,7 @@ await User.findByIdAndUpdate(
 
 
 })
-const generateRefreshAccessToken= asynchandler((req , res)=>{
+const generateRefreshAccessToken= asynchandler(async (req , res)=>{
     /*
     TO DO'S:
     1.get refresh token from cookies
@@ -225,26 +226,96 @@ const generateRefreshAccessToken= asynchandler((req , res)=>{
     6.once validated , generate new access and refresh tokens and create their cookies.
 
      */
-    const token = req.cookies?.refreshToken || req.body.refreshToken
-    if (!token) throw new APIERROR(401 , "unauthorised access")
-    const decoded_token = jwt.verify(token,process.env.REFRESH_TOKEN_SECRET)
-    if (!decoded_token)throw new APIERROR(401 , "something went wrong")
-    const user = await User.findById(decoded_token?._id).select("-password")
-    if (token!==user.refreshToken) throw new APIERROR(401,"unauthorised access")
-    const {new_accessToken , new_refreshToken} = generateAccessAndRefreshToken(decoded_token._id)
-    const options = {
-        httpOnly:true,
-        secure:true
-    }
+    try {
+        const token = req.cookies?.refreshToken || req.body.refreshToken
 
-    res
-        .status(200)
-        .cookie("accessToken" ,options,new_accessToken )
-        .cookie("refreshToken", options,new_refreshToken)
-        .json(new ApiResponse(200, {new_refreshToken,new_accessToken},"generated successfully"))
+        if (!token) throw new APIERROR(401, "unauthorised access")
+        const decoded_token = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET)
+        if (!decoded_token) throw new APIERROR(401, "something went wrong")
+
+        /** @type {import("../models/user.model.js").User} */
+
+        const user = await User.findById(decoded_token?._id).select("-password")
+        if (!user) throw new APIERROR(401,"something went wrong")
+
+        if (token !== user.refreshToken) throw new APIERROR(401, "unauthorised access")
+        const {new_accessToken, new_refreshToken} = await generateAccessAndRefreshToken(decoded_token._id)
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+
+        res
+            .status(200)
+            .cookie("accessToken", options, new_accessToken)
+            .cookie("refreshToken", options, new_refreshToken)
+            .json(new ApiResponse(200, {new_refreshToken, new_accessToken}, "generated successfully"))
+    } catch (e) {
+        throw new APIERROR(401 , e.message)
+
+    }
 
 
 
 
 })
-export {registerUser,loginUser,logoutUser,generateRefreshAccessToken}
+const changePassword = asynchandler(async (req,res)=>{
+    const {original_password , new_password,confirm_password} = req.body
+    if (!original_password.trim() || !new_password.trim()||!confirm_password.trim()) throw new APIERROR(401,"Enter Valid Info")
+    if (new_password!==confirm_password) throw new APIERROR(401,"Password doesnt match")
+    /** @type {import("../models/user.model.js").User} */
+    const user = await User.findById(req.user._id)
+    if(!user) throw new APIERROR(401,"USER NOT FETCHED")
+    const validate_password = await user.isPasswordCorrect(user.password)
+    if (!validate_password) throw new APIERROR(401,"unauthorised access")
+    user.passed = new_password
+    await user.save({validateBeforeSave:false})
+    return res
+        .status(200)
+        .json(new ApiResponse(200,{},"password updated"))
+    
+
+
+
+
+})
+//IF A USER IS LOGEDIN ....HE HAS ACCESS TO THE COOKIES
+const getuser = asynchandler(async (req ,res) =>{
+    return res.status(200).json(new ApiResponse(200,req.user,"user fetched"))
+
+})
+const updateUserInfo = asynchandler(async (req,res)=>{
+    const {fullName,email} = req.body;
+    if (!fullName || !email)throw new APIERROR(401,"give at least on attribute")
+
+    const user = await User.findByIdAndUpdate(req.cookies?._id,{
+        $set:{
+            fullName:fullName,
+            email:email
+        }
+    },
+        {new:true}//agr new true hai toh update hoone ke badh jo info hai vo mere user variable mei jayegi
+    ).select("-password")
+
+    return res.status(200).json(new ApiResponse(200,user, "Details Updated"))
+
+
+
+
+})
+const updateUserAvatar = asynchandler(async (req,res)=>{
+    console.log("file --> ----  " , req.file)
+    const new_avatar = req.file?.avatar
+    if (!new_avatar) throw new APIERROR(401, "avatar not uploaded")
+    const upload_new_avatar = await upload(new_avatar)
+    if (!upload_new_avatar.url) throw new APIERROR(401, "not uploaded on cloud")
+    const user = await User.findByIdAndUpdate(req.user._id , {
+        $set:{
+            avatar:upload_new_avatar.url
+        }
+    },{new:true}).select("-password -refreshToken")
+    res.status(200).json(new ApiResponse(200,user,"avatar updated"))
+
+
+})
+export {registerUser,loginUser,logoutUser,generateRefreshAccessToken,changePassword,getuser,updateUserInfo}

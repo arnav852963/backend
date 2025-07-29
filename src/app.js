@@ -12,7 +12,7 @@ app.use(express.json({limit: '16kb'}))
 // url is a zariya backend se communicate krne ka
 app.use(express.urlencoded({extended: true, limit:'16kb'}))
 app.use(express.static("public"))
-app.use(cookie())
+app.use(cookie()) //global middleware.
 
 
 // routes import

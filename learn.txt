@@ -148,3 +148,31 @@ Its job signature is always (req, res, next).
 
 ->Pass it along: Call next() to send the chassis to the next station.
 }
+
+HOW COOKIES WORK:
+{
+You can access the cookies because your browser (or API client like Postman) automatically sends them back to the server with every subsequent request.
+
+The cookies aren't passed directly from one controller to another on the server. They make a round trip to the client and back again.
+
+How Cookies Work: A Two-Way Street
+Here is the step-by-step flow:
+
+The Server Sets the Cookie (in /login) 🍪
+When your loginUser controller runs res.cookie("refreshToken", ...), it adds a Set-Cookie header to the HTTP response that is sent to the client.
+The client (your browser) sees this header and stores the refreshToken cookie.
+
+The Client Sends the Cookie Back (to /gen-refreshToken)
+When you make a new request from the client to your server (for example, to the /gen-refreshToken endpoint),
+the browser automatically looks at its stored cookies for that domain and includes them in a Cookie header on the new request.
+
+The Server Reads the Cookie (with cookie-parser)
+Your Express server receives this new request. Before it reaches your controller, the cookie-parser middleware runs.
+ It reads the incoming Cookie header, parses it, and creates the req.cookies object for you.
+
+Your Controller Accesses the Cookie
+By the time the request reaches your generateRefreshAccessToken controller, req.cookies has already been populated.
+ You can now simply read the value from req.cookies.refreshToken.
+
+So, the cookie makes a full round trip: Server → Client → Server.
+}
