@@ -176,3 +176,4 @@ By the time the request reaches your generateRefreshAccessToken controller, req.
 
 So, the cookie makes a full round trip: Server → Client → Server.
 }
+
