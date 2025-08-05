@@ -177,3 +177,10 @@ By the time the request reaches your generateRefreshAccessToken controller, req.
 So, the cookie makes a full round trip: Server → Client → Server.
 }
 
+ABOUT .single() IN MULTER:
+agr multer mei ek hi image ya file upoad krnihai toh.....
+upload_mul.single("file_name") se krenge ....
+also jab hum req object se locally uploaded file fetch krenge..
+to ...local_file = req.file...se krenge..naki req.files.filename -XXXXX
+req.file..hume uss ek file se related sari info ka object deega.
+usme se humme .path as argument dena hai cloudinary ko.
