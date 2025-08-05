@@ -5,7 +5,7 @@ import {upload} from "../utils/cloudinary.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import {existed} from "../utils/user_exists.js";
 import jwt from "jsonwebtoken";
-import {ConnectionStates} from "mongoose";
+// import {ConnectionStates} from "mongoose";
 
 const generateAccessAndRefreshToken = async function (userid){
     try{
@@ -266,9 +266,9 @@ const changePassword = asynchandler(async (req,res)=>{
     /** @type {import("../models/user.model.js").User} */
     const user = await User.findById(req.user._id)
     if(!user) throw new APIERROR(401,"USER NOT FETCHED")
-    const validate_password = await user.isPasswordCorrect(user.password)
+    const validate_password = await user.isPasswordCorrect(original_password)
     if (!validate_password) throw new APIERROR(401,"unauthorised access")
-    user.passed = new_password
+    user.password = new_password
     await user.save({validateBeforeSave:false})
     return res
         .status(200)
@@ -288,7 +288,7 @@ const updateUserInfo = asynchandler(async (req,res)=>{
     const {fullName,email} = req.body;
     if (!fullName || !email)throw new APIERROR(401,"give at least on attribute")
 
-    const user = await User.findByIdAndUpdate(req.cookies?._id,{
+    const user = await User.findByIdAndUpdate(req.user._id,{
         $set:{
             fullName:fullName,
             email:email
@@ -305,17 +305,29 @@ const updateUserInfo = asynchandler(async (req,res)=>{
 })
 const updateUserAvatar = asynchandler(async (req,res)=>{
     console.log("file --> ----  " , req.file)
-    const new_avatar = req.file?.avatar
-    if (!new_avatar) throw new APIERROR(401, "avatar not uploaded")
-    const upload_new_avatar = await upload(new_avatar)
+    const new_avatar = req?.file
+    if (!new_avatar) throw new APIERROR(401, "avatar notty uploaded")
+    const upload_new_avatar = await upload(new_avatar.path)
     if (!upload_new_avatar.url) throw new APIERROR(401, "not uploaded on cloud")
     const user = await User.findByIdAndUpdate(req.user._id , {
         $set:{
             avatar:upload_new_avatar.url
         }
     },{new:true}).select("-password -refreshToken")
-    res.status(200).json(new ApiResponse(200,user,"avatar updated"))
-
+    return res.status(200).json(new ApiResponse(200,user,"avatar updated"))
+// iske route mei multer ka middle ware laga denge.
 
 })
-export {registerUser,loginUser,logoutUser,generateRefreshAccessToken,changePassword,getuser,updateUserInfo}
+const updateCoverImage = asynchandler(async (req,res,_) =>{
+    const updatedCoverImage =  req.file
+    if (!updatedCoverImage) throw new APIERROR(401,"cover image nottty uploaded")
+    const uploadCloud = await upload(updatedCoverImage.path)
+    console.log("urllll----->",uploadCloud.url)
+    if (!uploadCloud.url) throw new APIERROR(401,"not uploaded on cloud")
+    const user = await User.findByIdAndUpdate(req.cookies._id ,
+        {
+            $set:{CoverImage: uploadCloud.url}
+        },{new:true}).select("-password -refreshToken")
+   return  res.status(200).json(new ApiResponse(200,user, "cover image updated"))
+})
+export {registerUser,loginUser,logoutUser,generateRefreshAccessToken,changePassword,getuser,updateUserInfo,updateUserAvatar,updateCoverImage,}

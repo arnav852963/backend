@@ -30,6 +30,7 @@ export const verifyJWT = asynchandler(async (req,/*res is empty*/ _ ,next ) =>{
    }
 
 // middle wares always used in routes
+    //decode krke info nikal ke req.user mei daaal di .
 
 
 })
