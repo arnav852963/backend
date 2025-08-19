@@ -5,6 +5,7 @@ import {upload} from "../utils/cloudinary.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import {existed} from "../utils/user_exists.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose"
 // import {ConnectionStates} from "mongoose";
 
 const generateAccessAndRefreshToken = async function (userid){
@@ -141,6 +142,7 @@ const loginUser = asynchandler(async (req,res) =>{
     const {email , password} = req.body
     if (email.trim()==="" || password.trimEnd()==="") throw new APIERROR(400,"PASSWORD AND USERNAME IS REQUIRED")
     if (!email.trim().includes('@')) throw new APIERROR(100, "ENTER VALID EMAIL ADDRESS")
+    /** @type {import("../models/user.model.js").User} */
 
     const user = await existed(email)//this instance of user doesnt contain reftoken
     if (!user) throw new APIERROR(404,"PLEASE REGISTER")
@@ -319,6 +321,9 @@ const updateUserAvatar = asynchandler(async (req,res)=>{
 
 })
 const updateCoverImage = asynchandler(async (req,res,_) =>{
+    /** @type {import("../models/user.model.js").User} */
+
+
     const updatedCoverImage =  req.file
     if (!updatedCoverImage) throw new APIERROR(401,"cover image nottty uploaded")
     const uploadCloud = await upload(updatedCoverImage.path)
@@ -329,5 +334,117 @@ const updateCoverImage = asynchandler(async (req,res,_) =>{
             $set:{CoverImage: uploadCloud.url}
         },{new:true}).select("-password -refreshToken")
    return  res.status(200).json(new ApiResponse(200,user, "cover image updated"))
+})
+const getUserChannelProfile = asynchandler(async (req,res)=>{
+    const {username} = req.param
+    if (!username) throw APIERROR(400,"username not found")
+    const channel = await User.aggregate([{
+        $match:{
+            username:username?.toLowerCase()
+        }
+    },{
+        $lookup:{
+            from:"Subscriptions",
+            localField:"_id",
+            foreignField:"channel",
+            as:"subscribers"
+        }
+    }, {
+        $lookup: {
+            from: "Subscriptions",
+            localField: "_id",
+            foreignField: "subscriber",
+            as: "subscribedTo"
+
+        }
+    },{
+        $addFields:{
+            subscriberCount:{
+                $size:"$subscriber"
+            },
+            subscribedTo:{
+                $size:"$subscribedTo"
+            },
+            isSubscribed:{
+                $cond:{
+                    if: {$in:[req.user?._id , "$subscriber.subscriber"]},
+                    then: true,
+                    else: false
+                }
+
+            }
+
+        }
+    },{
+        $project:{
+            fullName:1,
+            username:1,
+            avatar:1,
+            coverImage:1,
+            subscriberCount:1,
+            subscribedTo:1,
+            isSubscribed:1
+
+        }
+
+    }])
+    if (!channel) throw new APIERROR(401 , "cant project")
+    console.log("channel---->  " , channel)
+    res.status(200)
+        .json(new ApiResponse(200, channel , "here are your details"))
+})
+const watchHistory = asynchandler(async (req,res)=>{
+
+    /** @type {import("../models/user.model.js").User} */
+
+    const user = await User.aggregate([{
+        $match:{
+            _id: new mongoose.Types.ObjectId(req.user._id)
+        }
+
+    },{
+        $lookup:{
+            from:"videos",
+            localField:"watchHistory",
+            foreignField:"-id",
+            as:"watched",
+            pipeline:[{
+                $lookup:{
+                    from:"users",
+                    localField:"owner",
+                    foreignField:"_id",
+                    as:"owner",
+                    pipeline:[{
+                        $project:{
+                            fullName:1,
+                            username:1,
+                            avatar:1
+
+                        },
+
+                    }],
+
+            }
+
+            },{
+                $addFields:{
+                    watched:"$watched",
+                    owner:{
+                        $first:"$owner"
+                    }
+
+                }
+            }]
+        }
+
+    }])
+    if (!user) throw new APIERROR(400, "cannot get history")
+
+    res.status(200)
+        .json(new ApiResponse(200 , user , "history made"))
+
+
+
+
 })
 export {registerUser,loginUser,logoutUser,generateRefreshAccessToken,changePassword,getuser,updateUserInfo,updateUserAvatar,updateCoverImage,}

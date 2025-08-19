@@ -3,6 +3,7 @@ import mongo , {Schema} from "mongoose";
 const videoSchema = new Schema({
     videoFile:{
         type:String, // outsource
+        required: true
 
     },
     thumbnail:{
