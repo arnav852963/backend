@@ -1,4 +1,6 @@
-import mongo , {Schema} from "mongoose";
+import mongo , {Schema , Document}  from "mongoose";
+
+
 
 const videoSchema = new Schema({
     videoFile:{

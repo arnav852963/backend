@@ -149,6 +149,7 @@ const loginUser = asynchandler(async (req,res) =>{
     // database se jab bhi baat krni hai ...await always
 
 
+
     const isCorrect = await user.isPasswordCorrect(password)
 
 

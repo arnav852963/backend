@@ -31,8 +31,15 @@ app.use("/api/v1/user" , user_router)
 }
 import healthCheckRoute from "./routes/healthCheck.route.js";
 app.use("/api/v1" , healthCheckRoute)
+
 import videoRoute from "./routes/video.route.js";
 app.use("/api/v1/video" , videoRoute)
+
+import subscriptionRoute from "./routes/subscription.route.js";
+app.use("/api/v1/subscriptions" , subscriptionRoute)
+
+import tweetRoutes from "./routes/tweet.routes.js";
+app.use("/api/v1/tweets" , tweetRoutes)
 
 
 

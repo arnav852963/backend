@@ -3,6 +3,7 @@
 
 import {v2 as cloudinary} from "cloudinary"
 import fs from "fs" // file handeling mainly file kapath chahiye
+import {APIERROR} from "./APIERROR.js";
 import dotenv from "dotenv";
 dotenv.config({
     path:'./.env'
@@ -34,8 +35,32 @@ const upload = async (local_str)=>{
 
     }
 }
+const deleteFromCloudinary = async (url, resource_type = "auto") => {
+    if (!url) return null;
 
-export {upload}
+    try {
+
+        const publicId = url.split("/").pop().split(".")[0];
+
+        if (!publicId) {
+            throw new APIERROR(400, "Could not extract public_id from URL");
+        }
+
+
+        const result = await cloudinary.uploader.destroy(publicId, {
+            resource_type: resource_type,
+        });
+
+
+        return result;
+
+    } catch (error) {
+
+        throw new APIERROR(500, `Failed to delete file from Cloudinary: ${error.message}`);
+    }
+};
+
+export {upload , deleteFromCloudinary}
 
 {
     //upr yehi kiya hai in a subtle manner

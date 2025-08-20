@@ -1,6 +1,6 @@
 import {Router} from "express"
 import {upload_mul} from "../middlewares/multer.middleware.js";
-import {getVideoById, publishVideo, updateVideo} from "../controllers/video.controller.js";
+import {deleteVideo, getVideoById, publishVideo, updateVideo} from "../controllers/video.controller.js";
 import {verifyJWT} from "../middlewares/auth.middleware.js";
 
 
@@ -19,5 +19,6 @@ videoRoute.route("/uploadVideo").post(upload_mul.fields([
 
 videoRoute.route("/yourVideo").get(verifyJWT, getVideoById)
 videoRoute.route("/updateVideo").patch(verifyJWT , updateVideo)
+videoRoute.route("/deleteVideo").delete(verifyJWT , deleteVideo)
 
 export default videoRoute

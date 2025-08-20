@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import {upload_mul} from "../middlewares/multer.middleware.js";
-import {upload} from "../utils/cloudinary.js";
+import {deleteFromCloudinary, upload} from "../utils/cloudinary.js";
 import {asynchandler} from "../utils/asynchandler.js";
 import {APIERROR} from "../utils/APIERROR.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
@@ -53,7 +53,9 @@ const getVideoById = asynchandler( async (req, res)=>{
     const {videoId} = req.params
     if (!videoId) throw new APIERROR(400 , "id not found")
     const video = await Video.findById(videoId)
+
     if (!video) throw new APIERROR(400 , "video not fetched")
+    console.log(video._id)
     res.status(200)
         .json(new ApiResponse(200 , video , "here is your video"))
 
@@ -91,6 +93,8 @@ const deleteVideo = asynchandler(async (req, res) => {
     if (!videoId) throw  new APIERROR(200 , "id not found")
     const video = await Video.findByIdAndDelete(videoId)
     if (!video) throw new APIERROR(200 , "video not found or not deleted")
+    const cloud_delete = await deleteFromCloudinary(video.videoFile)
+    if (!(cloud_delete.result ==="ok")) throw new APIERROR(400 , "video not deleted from cloud")
     res.status(200)
         .json(new ApiResponse(200, {} , `video title ${video.title} deleted`))
 })
