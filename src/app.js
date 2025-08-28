@@ -41,6 +41,11 @@ app.use("/api/v1/subscriptions" , subscriptionRoute)
 import tweetRoutes from "./routes/tweet.routes.js";
 app.use("/api/v1/tweets" , tweetRoutes)
 
+import playlistRouter from "./routes/playlist.router.js";
+app.use("/api/v1/playlist" ,playlistRouter )
+
+import commentRoute from "./routes/comment.route.js";
+app.use("/api/v1/comment" , commentRoute)
 
 
 

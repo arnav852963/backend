@@ -1,10 +1,11 @@
 import {Router} from "express"
 import {upload_mul} from "../middlewares/multer.middleware.js";
-import {deleteVideo, getVideoById, publishVideo, updateVideo} from "../controllers/video.controller.js";
+import {deleteVideo, getAllVideos, getVideoById, publishVideo, updateVideo} from "../controllers/video.controller.js";
 import {verifyJWT} from "../middlewares/auth.middleware.js";
 
 
 const videoRoute = Router();
+videoRoute.route("/getAllVideos").get(verifyJWT , getAllVideos)
 
 videoRoute.route("/uploadVideo").post(upload_mul.fields([
     {

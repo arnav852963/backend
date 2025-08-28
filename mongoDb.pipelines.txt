@@ -1,0 +1,10 @@
+$group ->{
+say tere pass ek collection hai and u want to group some objects of those collections based on a particular
+field or property say income or age etc you can use group
+$group:{
+_id:"$(whater ever field u want like age , income)"
+
+it groups documents based on the uniue values of the field
+like if field == gender...it will make two grouos male and female
+}
+}

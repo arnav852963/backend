@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose,{isValidObjectId} from "mongoose";
 import {upload_mul} from "../middlewares/multer.middleware.js";
 import {deleteFromCloudinary, upload} from "../utils/cloudinary.js";
 import {asynchandler} from "../utils/asynchandler.js";
@@ -6,9 +6,58 @@ import {APIERROR} from "../utils/APIERROR.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import {fips} from "node:crypto";
 import {Video} from "../models/video.model.js";
+import {User} from "../models/user.model.js";
+import {all} from "express/lib/application.js";
+import {throws} from "node:assert";
 
 const getAllVideos = asynchandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
+
+    /** @type {import("../models/video.model.js").Video} */
+
+
+    const { page, limit, query, sortBy, sortType, userId } = req.query
+    if(!query ||!sortBy||!sortType||!userId||!isValidObjectId(userId)) throw new APIERROR(400 , "nah")
+
+    const skip = (parseInt(page)-1)*parseInt(limit)
+    const allVideos = await User.aggregate([{
+        $match:{
+            _id:new mongoose.Types.ObjectId(userId)
+        }
+
+    },{
+        $lookup:{
+            from:"videos",
+            pipeline:[{
+                $match:{
+                   title:{
+                       $regex:query,
+                       $options:"i"
+                   }
+                }
+            },{
+                $sort:{
+                    [sortBy]:sortType ==="asc"? 1:-1
+                }
+
+            },{
+                $skip:skip
+            },{
+                $limit:parseInt(limit)
+            }],
+            as:"matched"
+        }
+    },{
+        $project:{
+            matched:1
+        }
+
+    }])
+    if (allVideos.length<=0 || allVideos.matched.length <=0) throw new APIERROR(400 ,"VIDEOS NOT MATCHED")
+    res.status(200)
+        .json(throw new ApiResponse(200 , allVideos , "here are your results"))
+
+
+
 
 })
 
@@ -102,4 +151,4 @@ const deleteVideo = asynchandler(async (req, res) => {
 
 
 
-export {publishVideo , getVideoById , updateVideo , deleteVideo}
+export { getAllVideos ,publishVideo , getVideoById , updateVideo , deleteVideo}
