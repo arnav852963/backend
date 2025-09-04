@@ -61,6 +61,20 @@ const userSchema = new Schema({
     },
     refreshToken:{
         type:String
+    },
+    isEmailVerified:{
+        type:Boolean,
+        required:true
+    },
+    forgotPasswordToken:{
+        type:String,
+
+    },
+    forgotPasswordExpiry:{
+        type:Date
+    },
+    temporaryToken:{
+        type:String
     }
 
 
