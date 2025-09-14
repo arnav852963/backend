@@ -66,7 +66,7 @@ const channelStats = asynchandler(async (req,res)=>{
 
         }
     },])
-    if (!everyUserStat|| everyUserStat.length ===0 )throw new APIERROR(400 , "can get stats")
+    if ( everyUserStat.length ===0 )throw new APIERROR(400 , "can get stats")
     return res.status(200)
         .json(new ApiResponse(200 , everyUserStat[0] , "here are your stats"))
 
@@ -83,15 +83,15 @@ const getChannelVideos  = asynchandler(async (req,res)=>{
             from:"videos",
             localField:"_id",
             foreignField:"owner",
-            as:"videos"
+            as:"video"
         }
     },{
         $project:{
-            videos:1
+            video:1
         }
     }])
-    if (videos.length<=0) throw new APIERROR(400 ,"no videos found")
+    if (videos.length<=0 || videos[0].video ===0) throw new APIERROR(400 ,"no videos found")
     res.status(200)
-        .json(new ApiResponse(200 , videos ,"here are your videos"))
+        .json(new ApiResponse(200 , videos[0].video ,"here are your videos"))
 })
 export {getChannelVideos,channelStats}

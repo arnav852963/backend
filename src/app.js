@@ -46,7 +46,8 @@ app.use("/api/v1/playlist" ,playlistRouter )
 
 import commentRoute from "./routes/comment.route.js";
 app.use("/api/v1/comment" , commentRoute)
-
+import dashboardRoute from "./routes/dashboard.route.js";
+app.use("/api/v1/dashboard" , dashboardRoute)
 
 
 export {app}
