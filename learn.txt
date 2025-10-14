@@ -184,3 +184,7 @@ also jab hum req object se locally uploaded file fetch krenge..
 to ...local_file = req.file...se krenge..naki req.files.filename -XXXXX
 req.file..hume uss ek file se related sari info ka object deega.
 usme se humme .path as argument dena hai cloudinary ko.
+
+
+
+-> About type_of mongoose model....it returns a constructor function which can be used to create instances of that model.

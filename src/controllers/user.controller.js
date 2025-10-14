@@ -409,12 +409,29 @@ const watchHistory = asynchandler(async (req,res)=>{
             localField:"history",
             foreignField:"_id",
             pipeline:[{
+                $lookup:{
+                    from:"users",
+                    localField:"owner",
+                    foreignField:"-id",
+                    pipeline:[{
+                        $project:{
+                            username:1,
+                            avatar:1,
+
+
+                        }
+
+                    }],
+                    as:"owner_info"
+                }
+            }, {
                 $project:{
                     title:1,
                     thumbnail:1,
                     views:1,
                     duration:1,
-                    createdAt:1
+                    createdAt:1,
+                    owner_info:1
                 }
             }],
             as:"watchHistory"
@@ -430,7 +447,7 @@ const watchHistory = asynchandler(async (req,res)=>{
     if (watched.length ===0 || watched.watchHistory.length ===0) throw new APIERROR(400, "cannot get history")
 
     res.status(200)
-        .json(new ApiResponse(200 , watched.watchHistory , "history made"))
+        .json(new ApiResponse(200 , watched[0].watchHistory , "history made"))
 
 
 
