@@ -28,7 +28,7 @@ VideoTube is a robust backend system designed to power a video-sharing platform.
 
 ## Installation
 # Clone the repository
-git clone https://github.com/yourusername/videotube-backend.git
+git clone https://github.com/arnav852963/backend.git
 
 # Navigate to the project directory
 cd videotube-backend
