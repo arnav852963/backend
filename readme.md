@@ -40,18 +40,23 @@ npm install
 npm run dev
 
 ## Environment Variables
--Create a .env file in the root directory with the following variables:
--PORT=8000
--MONGODB_URI=your_mongodb_connection_string
--DB_NAME=Your_name
--CORS_ORIGIN=http://localhost:Your_port_no.
--ACCESS_TOKEN_SECRET=your_access_token_secret
--ACCESS_TOKEN_EXPIRY=1d
--REFRESH_TOKEN_SECRET=your_refresh_token_secret
--REFRESH_TOKEN_EXPIRY=10d
--CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
--CLOUDINARY_API_KEY=your_cloudinary_api_key
--CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+### 🛠️ Environment Variables
+
+Create a `.env` file in the root directory and add the following:
+
+```env
+PORT=8000
+MONGODB_URI=your_mongodb_connection_string
+DB_NAME=Your_name
+CORS_ORIGIN=http://localhost:Your_port_no
+ACCESS_TOKEN_SECRET=your_access_token_secret
+ACCESS_TOKEN_EXPIRY=1d
+REFRESH_TOKEN_SECRET=your_refresh_token_secret
+REFRESH_TOKEN_EXPIRY=10d
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+```
 
 ## 📡 API Endpoints
 ### User Routes
