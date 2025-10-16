@@ -49,6 +49,7 @@ const  registerUser = asynchandler(async (req, res)=>{
          */
 
     }
+    console.log(req.body);
     const {fullName ,email,username,password} =req.body
     console.log(email,"->email")
     /*if (fullName ==="") {
@@ -72,7 +73,9 @@ const  registerUser = asynchandler(async (req, res)=>{
     })/*--this findone finds the first user schema which matches the {username} and {email}*/
 
     if (existedUser) throw new APIERROR(409,"user exists")
-    /*multer req.files ka access deta hai*/ const localpath_avatar =req.files?.avatar[0]?.path // multer jo banaya tha yaha utilize hoora
+    /*multer req.files ka access deta hai*/ const localpath_avatar =req.files && req.files.avatar && req.files.avatar.length > 0
+        ? req.files.avatar[0].path
+        : null; // multer jo banaya tha yaha utilize hoora
 
     //console.log("file path-> ",req)
     // ..?.. does is that ki kya yeh field exist krti hai
@@ -242,7 +245,8 @@ const generateRefreshAccessToken= asynchandler(async (req , res)=>{
         if (!user) throw new APIERROR(401,"something went wrong")
 
         if (token !== user.refreshToken) throw new APIERROR(401, "unauthorised access")
-        const {new_accessToken, new_refreshToken} = await generateAccessAndRefreshToken(decoded_token._id)
+        const {accessToken:new_accessToken, refreshToken:new_refreshToken} = await generateAccessAndRefreshToken(decoded_token._id)
+        if(!new_accessToken || !new_refreshToken) throw new APIERROR(404 , "token cant be generated")
         const options = {
             httpOnly: true,
             secure: true
@@ -250,8 +254,8 @@ const generateRefreshAccessToken= asynchandler(async (req , res)=>{
 
         res
             .status(200)
-            .cookie("accessToken", options, new_accessToken)
-            .cookie("refreshToken", options, new_refreshToken)
+            .cookie("accessToken",new_accessToken,options)
+            .cookie("refreshToken" , new_refreshToken , options)
             .json(new ApiResponse(200, {new_refreshToken, new_accessToken}, "generated successfully"))
     } catch (e) {
         throw new APIERROR(401 , e.message)
@@ -308,9 +312,9 @@ const updateUserInfo = asynchandler(async (req,res)=>{
 })
 const updateUserAvatar = asynchandler(async (req,res)=>{
     console.log("file --> ----  " , req.file)
-    const new_avatar = req?.file
+    const new_avatar = req?.file?.path
     if (!new_avatar) throw new APIERROR(401, "avatar notty uploaded")
-    const upload_new_avatar = await upload(new_avatar.path)
+    const upload_new_avatar = await upload(new_avatar)
     if (!upload_new_avatar.url) throw new APIERROR(401, "not uploaded on cloud")
     const user = await User.findByIdAndUpdate(req.user._id , {
         $set:{
@@ -325,9 +329,9 @@ const updateCoverImage = asynchandler(async (req,res,_) =>{
     /** @type {import("../models/user.model.js").User} */
 
 
-    const updatedCoverImage =  req.file
+    const updatedCoverImage =  req?.file?.path
     if (!updatedCoverImage) throw new APIERROR(401,"cover image nottty uploaded")
-    const uploadCloud = await upload(updatedCoverImage.path)
+    const uploadCloud = await upload(updatedCoverImage)
     console.log("urllll----->",uploadCloud.url)
     if (!uploadCloud.url) throw new APIERROR(401,"not uploaded on cloud")
     const user = await User.findByIdAndUpdate(req.cookies._id ,

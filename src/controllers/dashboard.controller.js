@@ -20,7 +20,7 @@ const channelStats = asynchandler(async (req,res)=>{
         }
     },{
         $lookup:{
-            from: "subscriber",
+            from: "subscribers",
             localField: "_id",
             foreignField: "channel",
             as:"subscriber"

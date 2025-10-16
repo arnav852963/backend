@@ -68,4 +68,4 @@ const getChannelsSubscribedTo = asynchandler(async (req,res)=>{
 
 })
 
-export {toggleSubscription ,getUserChannelSubscribers}
+export {toggleSubscription ,getUserChannelSubscribers , getChannelsSubscribedTo}

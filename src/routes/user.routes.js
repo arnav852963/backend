@@ -35,12 +35,12 @@ router.route("/login").post(loginUser)
 
 //secure routes..
 router.route("/logout").post(/*middleware injected*/verifyJWT ,logoutUser)
-router.route("/gen-refreshToken").post(generateRefreshAccessToken)
+router.route("/gen-refreshToken").post( verifyJWT, generateRefreshAccessToken)
 router.route("/myaccount").get(verifyJWT,getuser)
-router.route("/changepassword").post(changePassword)
+router.route("/changepassword").patch( verifyJWT, changePassword)
 router.route("/update").post(verifyJWT,updateUserInfo)
-router.route("/updateUserAvatar").post(upload_mul.single("avatar"),verifyJWT,updateUserAvatar)
-router.route("/updateCoverImage").post(upload_mul.single("coverImage"),verifyJWT,updateCoverImage)
+router.route("/updateUserAvatar").patch(upload_mul.single("avatar"),verifyJWT,updateUserAvatar)
+router.route("/updateCoverImage").patch(upload_mul.single("coverImage"),verifyJWT,updateCoverImage)
 router.route("/watchHistory").get(verifyJWT,watchHistory)
 router.route("/userChannelProfile").get(verifyJWT,getUserChannelProfile)
 export default router

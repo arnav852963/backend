@@ -4,10 +4,10 @@ import {deleteFromCloudinary, upload} from "../utils/cloudinary.js";
 import {asynchandler} from "../utils/asynchandler.js";
 import {APIERROR} from "../utils/APIERROR.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
-import {fips} from "node:crypto";
+
 import {Video} from "../models/video.model.js";
 import {User} from "../models/user.model.js";
-import {all} from "express/lib/application.js";
+
 import {throws} from "node:assert";
 
 const getAllVideos = asynchandler(async (req, res) => {
@@ -54,7 +54,7 @@ const getAllVideos = asynchandler(async (req, res) => {
     }])
     if (allVideos.length<=0 || allVideos.matched.length <=0) throw new APIERROR(400 ,"VIDEOS NOT MATCHED")
     res.status(200)
-        .json(throw new ApiResponse(200 , allVideos , "here are your results"))
+        .json(new ApiResponse(200 , allVideos , "here are your results"))
 
 
 
@@ -73,13 +73,14 @@ const publishVideo = asynchandler( async (req,res)=>{
     const upload_vid = await upload(local_path_vid)
     const upload_thumb = await upload(local_path_thumb)
     if (!upload_thumb.url || !upload_vid.url) throw new APIERROR(400 , "cloudinary mistake")
+    console.log("cloud--->" , upload_vid)
     const video = await Video.create({
         videoFile: upload_vid.url || "",
         thumbnail: upload_thumb.url || "",
         owner: req?.user?._id,
         title:title,
         description:description,
-        duration: upload_vid.duration
+        duration: upload_vid.duration || ""
 
 
     })
@@ -115,21 +116,23 @@ const updateVideo = asynchandler(async (req,res)=>{
     /** @type {import("../models/video.model.js").Video} */
 
     const {videoId} = req.params
+    const {title = "null" , description = "null"} = req?.body
     if (!videoId) throw new APIERROR(400 , "id not found")
     const video_path = req?.file?.path
     if (!video_path) throw new APIERROR(400, "path not found")
     const upload_vid = await upload(video_path)
     if (!upload_vid.url) throw new APIERROR(200,"video not uploaded on cloud")
-    const video = await Video.findByIdAndUpdate(videoId , {
-        $set:{
-            videoFile:upload_vid.url
-        }
-    } , {new:true})
+    const video = await Video.findById(videoId).select("-owner")
+    video.videoFile = upload_vid?.url
+    video.duration = upload_vid?.duration
+    if(title!=="null") video.title = title
+    if(description!== "null") video.description  = description
+    const updatedVideo = await video.save({validateBeforeSave:false})
 
     if (!video)throw new APIERROR(200 , "video not updated")
 
     res.status(200)
-        .json(new ApiResponse(200,video , "video updated"))
+        .json(new ApiResponse(200,updatedVideo , "video updated"))
 
 
 })

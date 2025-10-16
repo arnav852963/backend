@@ -35,7 +35,7 @@ const upload = async (local_str)=>{
 
     }
 }
-const deleteFromCloudinary = async (url, resource_type = "auto") => {
+const deleteFromCloudinary = async (url, resource_type = "video") => {
     if (!url) return null;
 
     try {

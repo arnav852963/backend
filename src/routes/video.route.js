@@ -18,8 +18,8 @@ videoRoute.route("/uploadVideo").post(upload_mul.fields([
     }
 ]) , verifyJWT ,publishVideo)
 
-videoRoute.route("/yourVideo").get(verifyJWT, getVideoById)
-videoRoute.route("/updateVideo").patch(verifyJWT , updateVideo)
-videoRoute.route("/deleteVideo").delete(verifyJWT , deleteVideo)
+videoRoute.route("/yourVideo/:videoId").get(verifyJWT, getVideoById)
+videoRoute.route("/updateVideo/:videoId").patch(verifyJWT , upload_mul.single("video") ,  updateVideo)
+videoRoute.route("/deleteVideo/:videoId").delete(verifyJWT , deleteVideo)
 
 export default videoRoute

@@ -18,6 +18,14 @@ const createTweet = asynchandler(async (req,res)=>{
 
 })
 
+const  getAllTweets = asynchandler(async (req , res)=>{
+    const tweets = await Tweet.find({}).sort({createdAt:-1})
+    if(tweets.length ===0) throw new APIERROR(500 , "cant fetch all tweets")
+
+    return res.status(200).json(new ApiResponse(200 , tweets , "successfully got all the tweets"))
+
+})
+
 const getUserTweets = asynchandler(async  (req,res) =>{
     const tweets = await User.aggregate([{   //always returns an array even if its single object..
         $match:{
@@ -28,6 +36,11 @@ const getUserTweets = asynchandler(async  (req,res) =>{
             from:"tweets",
             localField:"_id",
             foreignField:"owner",
+            pipeline:[{
+                $sort:{
+                    createdAt:-1
+                }
+            }],
             as:"TWEETS"   // automatically adds field to the user
         }
     },{
@@ -37,7 +50,7 @@ const getUserTweets = asynchandler(async  (req,res) =>{
     }])
     if (tweets.length === 0) throw new APIERROR(400 , "no tweets")
     res.status(200)
-        .json(new ApiResponse(200 , {tweets:tweets.TWEETS}) , "here are your tweets")
+        .json(new ApiResponse(200 , {tweets:tweets[0].TWEETS}) , "here are your tweets")
 
 })
 const updateTweet = asynchandler(async  (req , res)=>{
@@ -74,4 +87,4 @@ const deleteTweet = asynchandler(async (req,res)=>{
 
 
 
-export {createTweet , getUserTweets , updateTweet,deleteTweet}
+export {createTweet, getAllTweets , getUserTweets , updateTweet,deleteTweet}
