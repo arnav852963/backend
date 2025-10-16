@@ -1,8 +1,4 @@
-Trae
 
-Let me examine more of the project structure to create a comprehensive README.
-
-src\controllers\user.controller.js 1 - 50
 
 # VideoTube Backend
 A comprehensive backend for a video-sharing platform similar to YouTube, built with Node.js, Express, and MongoDB.
